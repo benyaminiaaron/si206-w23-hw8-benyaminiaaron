@@ -1,7 +1,7 @@
-# Your name: 
-# Your student id:
-# Your email:
-# List who you have worked with on this homework:
+# Your name: Aaron Benyamini
+# Your student id: 7901 4001
+# Your email:aaronben@umich.edu
+# List who you have worked with on this homework: Daniel Kates
 
 import matplotlib.pyplot as plt
 import os

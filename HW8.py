@@ -24,6 +24,17 @@ def load_rest_data(db):
               INNER JOIN buildings ON restaurants.building_id = buildings.id''')
     rows = cur.fetchall()
 
+    for r in rows:
+        rest_name = r[0]
+        rest_category = r[1]
+        rest_building = r[2]
+        rest_rating = r[3]
+        rest_data[rest_name] = {"category": rest_category, "building": rest_building, "rating": rest_rating}
+    
+    conn.close()
+    
+    return rest_data
+
 def plot_rest_categories(db):
     """
     This function accepts a file name of a database as a parameter and returns a dictionary. The keys should be the

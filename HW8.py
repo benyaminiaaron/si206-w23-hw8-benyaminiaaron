@@ -1,6 +1,6 @@
 # Your name: Aaron Benyamini
 # Your student id: 7901 4001
-# Your email:aaronben@umich.edu
+# Your email: aaronben@umich.edu
 # List who you have worked with on this homework: Daniel Kates
 
 import matplotlib.pyplot as plt

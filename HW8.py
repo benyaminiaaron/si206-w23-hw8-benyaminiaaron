@@ -32,7 +32,7 @@ def load_rest_data(db):
         rest_data[rest_name] = {"category": rest_category, "building": rest_building, "rating": rest_rating}
     
     conn.close()
-    
+
     return rest_data
 
 def plot_rest_categories(db):
@@ -41,7 +41,28 @@ def plot_rest_categories(db):
     restaurant categories and the values should be the number of restaurants in each category. The function should
     also create a bar chart with restaurant categories and the count of number of restaurants in each category.
     """
-    pass
+    
+    conn = sqlite3.connect(db)
+    cur = conn.cursor()
+    cur.execute('''SELECT categories.category, COUNT(restaurants.id)
+                   FROM restaurants
+                   JOIN categories ON restaurants.category_id = categories.id
+                   GROUP BY categories.category
+                   ORDER BY COUNT(restaurants.id) DESC''')
+    
+    cat_data = {}
+    for r in cur.fetchall():
+        cat_data[r[0]] = r[1]
+    conn.close()
+    
+    plt.barh(list(cat_data.keys()), list(cat_data.values()))
+    plt.title('Restaurant Categories')
+    plt.xlabel('Count')
+    plt.ylabel('Category')
+    plt.gca().invert_yaxis()
+    plt.show()
+
+    return cat_data
 
 def find_rest_in_building(building_num, db):
     '''
@@ -49,7 +70,22 @@ def find_rest_in_building(building_num, db):
     restaurant names. You need to find all the restaurant names which are in the specific building. The restaurants 
     should be sorted by their rating from highest to lowest.
     '''
-    pass
+    conn = sqlite3.connect(db)
+    cur = conn.cursor()
+
+    restaurant_names = []
+    cur.execute('''SELECT restaurants.name, restaurants.rating
+                 FROM restaurants
+                 INNER JOIN buildings ON restaurants.building_id = buildings.id
+                 WHERE buildings.building = ?
+                 ORDER BY restaurants.rating DESC''', (building_num,))
+
+    rows = cur.fetchall()
+    for r in rows:
+        restaurant_names.append(r[0])
+    conn.close()
+
+    return restaurant_names
 
 #EXTRA CREDIT
 def get_highest_rating(db): #Do this through DB as well
@@ -63,7 +99,43 @@ def get_highest_rating(db): #Do this through DB as well
     The second bar chart displays the buildings along the y-axis and their ratings along the x-axis 
     in descending order (by rating).
     """
-    pass
+    conn = sqlite3.connect(db)
+    cur = conn.cursor()
+
+    # highest rated category
+    cur.execute('SELECT category, ROUND(AVG(rating), 1) as avg_rating FROM restaurants JOIN categories ON restaurants.category_id = categories.id GROUP BY category ORDER BY avg_rating DESC LIMIT 1')
+    high_category = cur.fetchone()
+
+    plt.subplot(211)
+    cur.execute('SELECT category, ROUND(AVG(rating), 1) as avg_rating FROM restaurants JOIN categories ON restaurants.category_id = categories.id GROUP BY category ORDER BY avg_rating ASC')
+    categories_list = cur.fetchall()
+    category_name = [category[0] for category in categories_list]
+    avg_rating = [category[1] for category in categories_list]
+    plt.barh(category_name, avg_rating)
+    plt.title('Average Restaurant Ratings by Category')
+    plt.xlabel('Rating')
+    plt.ylabel('Category')
+    plt.xlim(0, 5)
+
+    #highest rated building
+    cur.execute('SELECT building, ROUND(AVG(rating), 1) as avg_rating FROM restaurants JOIN buildings ON restaurants.building_id = buildings.id GROUP BY building ORDER BY avg_rating DESC LIMIT 1')
+    high_building = cur.fetchone()
+
+    plt.subplot(212)
+    cur.execute('SELECT building, ROUND(AVG(rating), 1) as avg_rating FROM restaurants JOIN buildings ON restaurants.building_id = buildings.id GROUP BY building ORDER BY avg_rating ASC')
+    buildings_list = cur.fetchall()
+    building_name = [str(building[0]) for building in buildings_list]
+    avg_rating = [building[1] for building in buildings_list]
+    plt.barh(building_name, avg_rating)
+    plt.title('Average Restaurant Ratings by Building')
+    plt.xlabel('Rating')
+    plt.ylabel('Building')
+    plt.xlim(0, 5)
+
+    plt.subplots_adjust(hspace=0.4)
+    plt.show()
+
+    return [(high_category[0], high_category[1]), (high_building[0], high_building[1])]
 
 #Try calling your functions here
 def main():
